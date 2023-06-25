@@ -43,7 +43,7 @@ public class MainView extends JFrame {
     }
 
     public void init() {
-        this.setTitle("Simple Anti-Virus");
+        this.setTitle("Ph?n m?m di?t virus Trojan");
         this.setSize(700, 500);
         this.setLocationRelativeTo(null);
         this.setLayout(new BorderLayout());
@@ -94,9 +94,11 @@ public class MainView extends JFrame {
         JPanel jPanel_left = new JPanel();
         jPanel_left.setPreferredSize(new Dimension(120, 500));
         jPanel_left.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 15));
+        // 20130340 (1)
         btn_view = new JButton("View result");
         btn_view.setPreferredSize(new Dimension(100, 30));
-        btn_view.addActionListener(ac);
+        btn_view.addActionListener(ac);  // 20130340 (1.1)
+
         btn_update = new JButton("Update");
         btn_update.setPreferredSize(new Dimension(100, 30));
         btn_update.addActionListener(ac);
@@ -125,7 +127,7 @@ public class MainView extends JFrame {
 
         Object[] title_table = {"Path", "Virus Type", "Virus Name", "Action"};
 
-        table_view = new JTable();
+        table_view = new JTable(); // 20130340 (5.2.1)
 
         table_model = new DefaultTableModel() {
             /**
@@ -155,7 +157,7 @@ public class MainView extends JFrame {
         };
         table_model.setColumnIdentifiers(title_table);
         table_view.setModel(table_model);
-        table_view.addMouseListener((MouseListener) ac); // 20130340
+        table_view.addMouseListener((MouseListener) ac); // 20130340 (5.2.1a)
         TableColumnModel columnModel = table_view.getColumnModel();
         TableColumn column = columnModel.getColumn(0);
         column.setPreferredWidth(300);
@@ -181,17 +183,17 @@ public class MainView extends JFrame {
         jPanel_bottom.setPreferredSize(new Dimension(90, 50));
         jPanel_bottom.setBorder(new TitledBorder("Action"));
 
-        // *20130340
+        // *20130340 (5.1.1)
         field_search = new JTextField(20);
         btn_search = new JButton("Search");
-        btn_search.addActionListener(ac);
+        btn_search.addActionListener(ac);// 20130340 (5.1.1a)
 
         JPanel searchPanel = new JPanel();
         searchPanel.add(field_search);
         searchPanel.add(btn_search);
-        // 20130340*
+        // *20130340 (5.3.1)
         btn_deltete = new JButton("Delete");
-        btn_deltete.addActionListener(ac);
+        btn_deltete.addActionListener(ac); //20130340 (5.3.1a)
 
         jPanel_bottom.add(searchPanel); // 20130340
         jPanel_bottom.add(btn_deltete);

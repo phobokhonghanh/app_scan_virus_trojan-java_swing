@@ -1,27 +1,22 @@
 package virusanalyzer;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.net.*;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.FileChannel;
-import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Stack;
 
 public class VirusAnalyzer {
     public static ArrayList<String> virusDefinitions = new ArrayList<>();
     public static ArrayList<String> virusNames = new ArrayList<>();
     public static ArrayList<String> virusTypes = new ArrayList<>();
     public static VirusHandler virusHandler = new VirusHandler();
-    public static boolean isVirus = virusHandler.readVirusDefinition();
+    public static boolean check = virusHandler.readVirusDefinition();
     private static int scanCount = 1;
-
     public static ArrayList<Object[]> infectedFiles = new ArrayList<>(); // 20130340
     public static File fileSession; // 20130340
     public static File fileError; // 20130340
@@ -61,7 +56,7 @@ public class VirusAnalyzer {
             String fileChecksum = "";
             try {
                 fileChecksum = logic.md5Generator(file.toString());
-                if (isVirus) {
+                if (check) {
                     int index = logic.analyze(fileChecksum, virusDefinitions);
                     if (index != -1) {
                         return new Object[]{file.getAbsolutePath(), virusTypes.get(index).toString(),
@@ -107,7 +102,8 @@ public class VirusAnalyzer {
         }
         return false;
     }
-    //20130340
+
+    //20130340 (5.3.1d3)
     public static boolean deleteFilesInfected(ArrayList<String> listChoose) {
         // xóa hết tất cả
         // basic: xoa thanh cong -> xoa het tat ca cac file - xoa het tat ca bo nho - xoa luon file session
@@ -144,7 +140,7 @@ public class VirusAnalyzer {
         return true;
     }
 
-    // 20130340
+    // 20130340 (5.1.1b)
     public static ArrayList<Object[]> findFile(String keyWords) {
         ArrayList<Object[]> rs = new ArrayList<>();
         for (Object[] o : infectedFiles) {
@@ -164,6 +160,8 @@ public class VirusAnalyzer {
 
     public static void writeVirusToFile(ArrayList<Object[]> listVirus) {
         String dateStr = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+//        String projectDirectory = System.getProperty("user.dir"); // lấy đường dẫn tuyệt đối của thư mục gốc
+//        File outFile = new File(projectDirectory, "Virus/virus_"+ dateStr + "_scan" + scanCount + ".txt");
         File outFile = new File("Virus/virus_" + dateStr + "_scan" + scanCount + ".txt");
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(outFile))) {
             if (listVirus != null) {
@@ -180,6 +178,7 @@ public class VirusAnalyzer {
         fileSession = outFile;
     }
 
+    //    20130340 (3.2)
     public static ArrayList<Object[]> readVirusFromFile(File file) {
         ArrayList<Object[]> listVirus = new ArrayList<>();
         if (file != null && file.exists()) {
@@ -201,48 +200,50 @@ public class VirusAnalyzer {
         fileSession = file; // 20130340
         return listVirus;
     }
-	@SuppressWarnings("resource")
-	public static void UpdateApp(File sourceFile, File destFile) throws IOException {
-		// Kiểm tra nếu tệp tin đích đã tồn tại, xóa nó đi
-		if (destFile.exists()) {
-			destFile.delete();
-		}
 
-		// sao chép nội dung của tệp tin nguồn vào tệp tin đích
-		FileChannel sourceChannel = null;
-		FileChannel destChannel = null;
-		try {
-			sourceChannel = new FileInputStream(sourceFile).getChannel();
-			destChannel = new FileOutputStream(destFile).getChannel();
-			destChannel.transferFrom(sourceChannel, 0, sourceChannel.size()); // Sao chép nội dung
-		} finally {
-			// Đóng các kênh để giải phóng tài nguyên
-			if (sourceChannel != null) {
-				sourceChannel.close();
-			}
-			if (destChannel != null) {
-				destChannel.close();
-			}
-		}
-	}
+    @SuppressWarnings("resource")
+    public static void UpdateApp(File sourceFile, File destFile) throws IOException {
+        // Kiểm tra nếu tệp tin đích đã tồn tại, xóa nó đi
+        if (destFile.exists()) {
+            destFile.delete();
+        }
 
-	// 2.5 tạo hàm downloadAndSaveFile
-	public static void downloadAndSaveFile(String fileUrl, String saveDir) {
-		try {
-			URL url = new URL(fileUrl);
-			URLConnection conn = url.openConnection();
-			InputStream in = conn.getInputStream();
-			FileOutputStream out = new FileOutputStream(saveDir);
-			byte[] buffer = new byte[1024];
-			int length;
-			while ((length = in.read(buffer)) > 0) {
-				out.write(buffer, 0, length);
-			}
-			in.close();
-			out.close();
-		} catch (IOException e) {
-			// Handle any exceptions that may occur
-			e.printStackTrace();
-		}
-	}
+        // sao chép nội dung của tệp tin nguồn vào tệp tin đích
+        FileChannel sourceChannel = null;
+        FileChannel destChannel = null;
+        try {
+            sourceChannel = new FileInputStream(sourceFile).getChannel();
+            destChannel = new FileOutputStream(destFile).getChannel();
+            destChannel.transferFrom(sourceChannel, 0, sourceChannel.size()); // Sao chép nội dung
+        } finally {
+            // Đóng các kênh để giải phóng tài nguyên
+            if (sourceChannel != null) {
+                sourceChannel.close();
+            }
+            if (destChannel != null) {
+                destChannel.close();
+            }
+        }
+    }
+
+    // 2.5 tạo hàm downloadAndSaveFile
+    public static void downloadAndSaveFile(String fileUrl, String saveDir) {
+        try {
+            URL url = new URL(fileUrl);
+            URLConnection conn = url.openConnection();
+            InputStream in = conn.getInputStream();
+            FileOutputStream out = new FileOutputStream(saveDir);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = in.read(buffer)) > 0) {
+                out.write(buffer, 0, length);
+            }
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            // Handle any exceptions that may occur
+            e.printStackTrace();
+        }
+    }
+
 }
